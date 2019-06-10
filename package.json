@@ -1,0 +1,39 @@
+{
+  "name": "project-validator",
+  "version": "0.0.1",
+  "description": "Validates projects that uses K8S and Docker, searching for commons issues and wrong configurations.",
+  "keywords": [
+    "docker",
+    "kubernetes",
+    "k8s",
+    "validator",
+    "ci"
+  ],
+  "main": "index.js",
+  "author": "@dnorio",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dnorio/peval.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dnorio/peval/issues/"
+  },
+  "preferGlobal": true,
+  "bin": {
+    "pval": "bin/validator.js",
+    "peval": "bin/validator.js",
+    "projval": "bin/validator.js",
+    "projecteval": "bin/validator.js",
+    "projectvalidator": "bin/validator.js",
+    "project-validator": "bin/validator.js"
+  },
+  "dependencies": {
+    "chalk": "2.4.2",
+    "commander": "2.20.0",
+    "js-yaml": "3.13.1"
+  },
+  "devDependencies": {
+    "mocha": "6.1.4"
+  }
+}
