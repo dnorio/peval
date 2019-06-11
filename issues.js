@@ -119,7 +119,7 @@ const issues = {
       opinionated: false
     }),
     duplicatedEnvVariable: (file, workName, containerName, variableName) => ({
-      severity: severities.breakable,
+      severity: severities.minor,
       code: 'k8s010',
       shortDescription: `Duplicated env variable '${variableName}' for container ${containerName}.`,
       longDescription: `Found duplicated variable '${variableName}' in container '${containerName}' at '${workName}'.`,
@@ -150,6 +150,15 @@ const issues = {
       code: 'k8s013',
       shortDescription: `Variable '${keyName}' of configmap '${configmap}' isn't used.`,
       longDescription: `Variable '${keyName}' of configmap '${configmap}' isn't used.`,
+      foundAt: file,
+      references: [],
+      opinionated: false
+    }),
+    containerWithWrongSpecification: (file, deploymentName, parsedContent) => ({
+      severity: severities.breakable,
+      code: 'k8s014',
+      shortDescription: `Container found in '${deploymentName}' appears to be invalid. Check for lines with content ${JSON.stringify(parsedContent)}.`,
+      longDescription: `Container found in '${deploymentName}' appears to be invalid (Maybe is an identation problem?). Check for lines with content ${JSON.stringify(parsedContent)}.`,
       foundAt: file,
       references: [],
       opinionated: false

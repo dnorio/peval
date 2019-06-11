@@ -9,10 +9,13 @@ const { validateApiVersion } = require('./validateApiVersions')
 const { validateContainers } = require('./validateContainers')
 
 /**
- * Analisa os resources
- * @param {Object[]} k8sResources
+ * @param {Object} param
+ * @param {Function} param.logInfo
+ * @param {Function} param.logError
+ * @param {Boolean} param.debugInfo
+ * @param {Object[]} param.k8sResources
  */
-const analyseResources = (k8sResources) => {
+const analyseResources = ({ logInfo, logError, debugInfo, k8sResources }) => {
   let issues = []
   let data = []
 
@@ -23,7 +26,7 @@ const analyseResources = (k8sResources) => {
   ]
 
   // Adds issues for containers, looking at cronjobs, jobs, deployments and configmaps
-  const containersValidation = validateContainers(k8sResources)
+  const containersValidation = validateContainers({ logInfo, logError, debugInfo, k8sResources })
   issues = [ ...issues, ...containersValidation.issues ]
   data = [ ...data, ...containersValidation.data ]
 
@@ -36,6 +39,7 @@ const analyseResources = (k8sResources) => {
 const validate = ({ logInfo = console.log, logError = console.error, debugInfo, workingDir } = {
   logInfo: console.log,
   logError: console.error,
+  debugInfo: false,
   workingDir: process.cwd()
 }) => {
   let issues = []
@@ -44,7 +48,7 @@ const validate = ({ logInfo = console.log, logError = console.error, debugInfo, 
   yamlsGroups.map(y => {
     logInfo(`Running K8S configuration analysis for path: ${y[0]}...`)
     const k8sResources = getK8sResources(y[1])
-    const analysis = analyseResources(k8sResources)
+    const analysis = analyseResources({ logInfo, logError, debugInfo, k8sResources })
     issues = [ ...issues, ...analysis.issues ]
     data = [ ...data, ...analysis.data ]
   })

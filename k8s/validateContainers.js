@@ -8,8 +8,15 @@ const enforceArray = obj => Array.isArray(obj) ? obj : [obj]
  * Validate deployment's containers against variables in configmaps, itself and commands.
  */
 
-const validateContainers = (k8sResources, debugInfo = false) => {
+const validateContainers = ({ logInfo, logError, debugInfo, k8sResources }) => {
   let issues = []
+
+  if (debugInfo) {
+    logInfo('#####################')
+    logInfo('k8sResources:')
+    logInfo(JSON.stringify(k8sResources, undefined, 2))
+    logInfo('#####################')
+  }
 
   const configMaps = k8sResources.filter(r => r.content.kind === 'ConfigMap')
   const deployments = k8sResources.filter(r => r.content.kind === 'Deployment')
@@ -78,7 +85,18 @@ const validateContainers = (k8sResources, debugInfo = false) => {
       }))
     )
     .reduce((pv, cv) => pv.concat(cv), [])
-  const containers = [ ...deploymentContainers, ...cronJobsContainers ]
+  let containers = [ ...deploymentContainers, ...cronJobsContainers ]
+
+  // No broken identation for containers
+  containers
+    .filter(c => !c.image)
+    .forEach(noContainer => issues.push(k8sIssues.containerWithWrongSpecification(
+      noContainer.file,
+      noContainer.workName,
+      (delete noContainer.file, delete noContainer.workName, noContainer)
+    )))
+
+  containers = containers.filter(c => c.image)
 
   // No command override
   containers
@@ -242,9 +260,9 @@ const validateContainers = (k8sResources, debugInfo = false) => {
         solvedVariablesByContainer.set(container.name, new Map())
       }
       if (debugInfo) {
-        console.log('####')
-        console.log(solvedVariablesByContainer)
-        console.log(container)
+        logInfo('####')
+        logInfo(solvedVariablesByContainer)
+        logInfo(container)
       }
       container.env.forEach(env => {
         if (env.valueFrom && env.valueFrom.configMapKeyRef) {
@@ -264,9 +282,9 @@ const validateContainers = (k8sResources, debugInfo = false) => {
       })
     })
   if (debugInfo) {
-    console.log(configMapsUsedVariables)
-    console.log(configMapsVariables)
-    console.log(solvedVariablesByContainer)
+    logInfo(configMapsUsedVariables)
+    logInfo(configMapsVariables)
+    logInfo(solvedVariablesByContainer)
   }
   let data = [{ configMapsUsedVariables, configMapsVariables }]
   return {

@@ -43,14 +43,28 @@ const findYamlsSplittedByDirectory = (workingDir) =>
 * Obtem resources do k8s
 * @param {String[]} paths
 */
-const getK8sResources = (paths = []) => paths
-  .map(path =>
-    readFileSync(path, 'utf8')
-      .split(/--- *\r?\n/)
-      .filter(Boolean)
-      .map(contentStr => ({ content: safeLoad(contentStr), path }))
-  )
-  .reduce((pv, cv) => pv.concat(cv), [])
+const getK8sResources = (paths = []) => {
+  const k8sResources = paths
+    .map(path =>
+      readFileSync(path, 'utf8')
+        .split(/--- *\r?\n/)
+        .filter(Boolean)
+        .map(contentStr => ({ content: safeLoad(contentStr), path }))
+    )
+    .reduce((pv, cv) => pv.concat(cv), [])
+
+  const k8sResourcesNormalizedForLists = k8sResources
+    .reduce((pv, cv) => {
+      if (Array.isArray(cv.content)) {
+        return [...pv, ...cv.content.map(i => ({ content: i, path: cv.path }))]
+      }
+      if (cv.content.kind === 'List') {
+        return [...pv, ...cv.content.items.map(i => ({ content: i, path: cv.path }))]
+      }
+      return [...pv, cv]
+    }, [])
+  return k8sResourcesNormalizedForLists
+}
 
 module.exports = {
   findYamlsSplittedByDirectory,
