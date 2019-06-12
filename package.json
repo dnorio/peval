@@ -1,6 +1,6 @@
 {
-  "name": "project-validator",
-  "version": "0.0.2",
+  "name": "pval",
+  "version": "0.0.3",
   "description": "Validates projects that uses K8S and Docker, searching for commons issues and wrong configurations.",
   "keywords": [
     "docker",

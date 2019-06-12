@@ -286,7 +286,7 @@ const validateContainers = ({ logInfo, logError, debugInfo, k8sResources }) => {
     logInfo(configMapsVariables)
     logInfo(solvedVariablesByContainer)
   }
-  let data = [{ configMapsUsedVariables, configMapsVariables }]
+  let data = [{ configMapsUsedVariables, configMapsVariables, solvedVariablesByContainer }]
   return {
     issues,
     data

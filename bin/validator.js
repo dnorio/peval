@@ -11,6 +11,7 @@ commander
     '\t\'3\' for up to high issues;\n' +
     '\t\'4\' for enabling toleration of any issue, including breaking configurations.',
   /^0|1|2|3|4$/g, 3)
+  .option('-o, --disable-opiniated', 'Disables opinionated validations', false)
   .option('-d, --debug', 'Enables debug logging.', false)
   .option('-v, --verbose', 'Enables verbose issues description.', true)
   .parse(process.argv)
@@ -19,5 +20,6 @@ validate({
   workingDir: commander.path,
   debugInfo: commander.debug,
   verbose: commander.verbose,
-  maxLevelAllowed: commander.level
+  maxLevelAllowed: commander.level,
+  disableOpinionated: commander.disableOpinionated
 })

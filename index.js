@@ -6,6 +6,10 @@ const k8sValidator = require('./k8s')
 const dockerValidator = require('./docker')
 const packageValidator = require('./npm')
 
+const { getInstanceMemory } = require('./config')
+
+const memory = getInstanceMemory()
+
 const mapSeverity = severity => {
   switch (severity) {
     case severities.breakable:
@@ -50,7 +54,8 @@ const validate = ({
   workingDir = process.cwd(),
   debugInfo = false,
   verbose = true,
-  maxLevelAllowed = 3
+  maxLevelAllowed = 3,
+  opinionated = false
 } = {
   logInfo: console.log,
   logError: console.error,
@@ -79,10 +84,64 @@ const validate = ({
       }))
       .reduce((pv, cv) => ({
         issues: [ ...pv.issues, ...cv.issues ],
-        data: [ ...pv.issues, ...cv.issues ]
+        data: [ ...pv.data, ...cv.data ]
       }), { issues: [], data: [] })
     issues = result.issues
     data = result.data
+
+    for (let z = 0; z < data.length; z++) {
+      if (debugInfo) {
+        logInfo('----- DATA')
+        logInfo(data[z].configMapsUsedVariables)
+        logInfo(data[z].configMapsVariables)
+        logInfo(data[z].solvedVariablesByContainer)
+        logInfo('-----')
+      }
+      const solvedVariablesByContainerList = [...data[z].solvedVariablesByContainer]
+      /** Custom rule type #1 no variable */
+      for (let i = 0; i < memory.customRulesNoVariableAllContainers.length; i++) {
+        const rule = memory.customRulesNoVariableAllContainers[i]
+        for (let j = 0; j < solvedVariablesByContainerList.length; j++) {
+          const solvedVariable = solvedVariablesByContainerList[j]
+          if (solvedVariable[1].has(rule.variableName)) {
+            issues.push(rule.builder(`file for '${solvedVariable[0]}'`)) // TODO: Enhance location description
+          }
+        }
+      }
+
+      /** Custom rule type #2 no variable at specific deployment */
+      for (let i = 0; i < memory.customRulesNoVariableSpecific.length; i++) {
+        const rule = memory.customRulesNoVariableSpecific[i]
+        if (data[z].solvedVariablesByContainer.has(rule.deploymentName) &&
+          data[z].solvedVariablesByContainer.get(rule.deploymentName).has(rule.variableName)) {
+          issues.push(rule.builder(`file for '${rule.deploymentName}'`)) // TODO: Enhance location description
+        }
+      }
+
+      /** Custom rule type #3 no variable with value */
+      for (let i = 0; i < memory.customRulesNoVariableAllContainersWithValue.length; i++) {
+        const rule = memory.customRulesNoVariableAllContainersWithValue[i]
+        for (let j = 0; j < solvedVariablesByContainerList.length; j++) {
+          const solvedVariable = solvedVariablesByContainerList[j]
+          if (solvedVariable[1].has(rule.variableName) &&
+            solvedVariable[1].get(rule.variableName).solved &&
+            solvedVariable[1].get(rule.variableName).value === rule.value) {
+            issues.push(rule.builder(`file for '${solvedVariable[0]}'`)) // TODO: Enhance location description
+          }
+        }
+      }
+
+      /** Custom rule type #4 no variable with value at specific deployment */
+      for (let i = 0; i < memory.customRulesNoVariableSpecificWithValue.length; i++) {
+        const rule = memory.customRulesNoVariableSpecificWithValue[i]
+        if (data[z].solvedVariablesByContainer.has(rule.deploymentName) &&
+          data[z].solvedVariablesByContainer.get(rule.deploymentName).has(rule.variableName) &&
+          data[z].solvedVariablesByContainer.get(rule.deploymentName).get(rule.variableName).solved &&
+          data[z].solvedVariablesByContainer.get(rule.deploymentName).get(rule.variableName).value === rule.value) {
+          issues.push(rule.builder(`file for '${rule.deploymentName}'`)) // TODO: Enhance location description
+        }
+      }
+    }
 
     if (issues.length > 0) {
       maxLevel = Math.max(...issues.map(i => severitiesLevel[i.severity]))
@@ -114,6 +173,18 @@ const validate = ({
   }
 }
 
+// /** Testes */
+// memory.builder
+//   .set.rule('k8s002').enabled(false)
+//   .set.kubernetesIssue.emptyApiVersion.opinionated()
+//   .set.kubernetesIssue.emptyApiVersion.opinionated(false)
+//   .set.kubernetesIssue.noCronJobWithoutContainers.enabled(true)
+//   .add.forbiddenVariable({ variableName: 'MAIL_FROM', severity: severities.minor, commentary: 'esta variavel eh inutil' })
+//   .add.forbiddenVariable({ variableName: 'VAR_2', severity: severities.high, deploymentName: 'test-container-name', commentary: 'nao pode!!' })
+//   .add.forbiddenVariableWithValue({ variableName: 'VAR_2', value: 'var2 value', severity: severities.high, commentary: 'nao pode22!!' })
+//   .add.forbiddenVariableWithValue({ variableName: 'VAR_2', value: 'var2 value', severity: severities.high, deploymentName: 'test-container-name', commentary: 'nao pode22fdaafs!!' })
+// validate({ debugInfo: true })
 module.exports = {
-  validate
+  validate,
+  extend: memory.builder
 }
