@@ -83,8 +83,8 @@ const validate = ({
         ...validator.validate({ logInfo, logError, debugInfo, workingDir })
       }))
       .reduce((pv, cv) => ({
-        issues: [ ...pv.issues, ...cv.issues ],
-        data: [ ...pv.data, ...cv.data ]
+        issues: [...pv.issues, ...cv.issues],
+        data: [...pv.data, ...cv.data]
       }), { issues: [], data: [] })
     issues = result.issues
     data = result.data

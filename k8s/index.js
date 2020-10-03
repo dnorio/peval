@@ -20,15 +20,15 @@ const analyseResources = ({ logInfo, logError, debugInfo, k8sResources }) => {
   let data = []
 
   // Adds issues for apiVersion
-  issues = [ ...issues, ...k8sResources
+  issues = [...issues, ...k8sResources
     .map(d => validateApiVersion(d.path, d.content.kind, d.content.apiVersion))
     .reduce((pv, cv) => pv.concat(cv), [])
   ]
 
   // Adds issues for containers, looking at cronjobs, jobs, deployments and configmaps
   const containersValidation = validateContainers({ logInfo, logError, debugInfo, k8sResources })
-  issues = [ ...issues, ...containersValidation.issues ]
-  data = [ ...data, ...containersValidation.data ]
+  issues = [...issues, ...containersValidation.issues]
+  data = [...data, ...containersValidation.data]
 
   return {
     issues,
@@ -49,8 +49,8 @@ const validate = ({ logInfo = console.log, logError = console.error, debugInfo, 
     logInfo(`Running K8S configuration analysis for path: ${y[0]}...`)
     const k8sResources = getK8sResources(y[1])
     const analysis = analyseResources({ logInfo, logError, debugInfo, k8sResources })
-    issues = [ ...issues, ...analysis.issues ]
-    data = [ ...data, ...analysis.data ]
+    issues = [...issues, ...analysis.issues]
+    data = [...data, ...analysis.data]
   })
 
   return {

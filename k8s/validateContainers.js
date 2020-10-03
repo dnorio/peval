@@ -9,7 +9,7 @@ const enforceArray = obj => Array.isArray(obj) ? obj : [obj]
  */
 
 const validateContainers = ({ logInfo, logError, debugInfo, k8sResources }) => {
-  let issues = []
+  const issues = []
 
   if (debugInfo) {
     logInfo('#####################')
@@ -85,7 +85,7 @@ const validateContainers = ({ logInfo, logError, debugInfo, k8sResources }) => {
       }))
     )
     .reduce((pv, cv) => pv.concat(cv), [])
-  let containers = [ ...deploymentContainers, ...cronJobsContainers ]
+  let containers = [...deploymentContainers, ...cronJobsContainers]
 
   // No broken identation for containers
   containers
@@ -286,7 +286,7 @@ const validateContainers = ({ logInfo, logError, debugInfo, k8sResources }) => {
     logInfo(configMapsVariables)
     logInfo(solvedVariablesByContainer)
   }
-  let data = [{ configMapsUsedVariables, configMapsVariables, solvedVariablesByContainer }]
+  const data = [{ configMapsUsedVariables, configMapsVariables, solvedVariablesByContainer }]
   return {
     issues,
     data

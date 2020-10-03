@@ -188,6 +188,7 @@ const getInstanceMemory = () => {
     constructor () {
       this.kubernetesIssue = new SetK8SIssueBuilder()
     }
+
     /**
    * References rule by code
    * @param {'k8s001'|'k8s002'|'k8s003'|'k8s004'|'k8s005'|'k8s006'|'k8s007'|'k8s008'|'k8s009'|'k8s010'|'k8s011'|'k8s012'|'k8s013'|'k8s014'} ruleCode
@@ -290,6 +291,7 @@ const getInstanceMemory = () => {
     constructor (ruleCode) {
       this.ruleCode = ruleCode
     }
+
     /**
    * Sets some rule 'opiniated' property
    * @param {Boolean} value
@@ -298,6 +300,7 @@ const getInstanceMemory = () => {
       updateOpinionatedProperty(this.ruleCode, value)
       return new RuleSetBuilderOptionsLoop()
     }
+
     /**
    * Enables/disables some issue
    * @param {Boolean} value
@@ -313,6 +316,7 @@ const getInstanceMemory = () => {
       super()
       this.ruleCode = ruleCode
     }
+
     /**
    * Sets some rule 'opiniated' property
    * @param {Boolean} value
@@ -321,6 +325,7 @@ const getInstanceMemory = () => {
       updateOpinionatedProperty(this.ruleCode, value)
       return this
     }
+
     /**
    * Enables/disables some issue
    * @param {Boolean} value
